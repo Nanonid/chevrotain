@@ -1,6 +1,6 @@
 "use strict"
 
-const { Parser, EOF, tokenMatcher } = require("chevrotain")
+const { EmbeddedActionsParser, EOF, tokenMatcher } = require("chevrotain")
 const tokens = require("./ecma5_tokens")
 // for conciseness
 const t = tokens
@@ -9,19 +9,13 @@ const ENABLE_SEMICOLON_INSERTION = true
 const DISABLE_SEMICOLON_INSERTION = false
 
 // as defined in https://www.ecma-international.org/ecma-262/5.1/index.html
-class ECMAScript5Parser extends Parser {
+class ECMAScript5Parser extends EmbeddedActionsParser {
     set orgText(newText) {
         this._orgText = newText
     }
 
     constructor() {
-        super(tokens, {
-            outputCst: false,
-            ignoredIssues: {
-                Statement: { OR: true },
-                SourceElements: { OR: true }
-            }
-        })
+        super(tokens)
 
         // Optimization to avoid traversing the prototype chain at hotspots.
         this.SUPER_CONSUME = super.CONSUME
@@ -364,7 +358,13 @@ class ECMAScript5Parser extends Parser {
                         { ALT: () => $.SUBRULE($.EmptyStatement) },
                         // "LabelledStatement" must appear before "ExpressionStatement" due to common lookahead prefix ("inner :" vs "inner")
                         { ALT: () => $.SUBRULE($.LabelledStatement) },
-                        { ALT: () => $.SUBRULE($.ExpressionStatement) },
+                        // The ambiguity is resolved by the ordering of the alternatives
+                        // See: https://ecma-international.org/ecma-262/5.1/#sec-12.4
+                        //   - [lookahead ∉ {{, function}]
+                        {
+                            ALT: () => $.SUBRULE($.ExpressionStatement),
+                            IGNORE_AMBIGUITIES: true
+                        },
                         { ALT: () => $.SUBRULE($.IfStatement) },
                         { ALT: () => $.SUBRULE($.IterationStatement) },
                         { ALT: () => $.SUBRULE($.ContinueStatement) },
@@ -788,10 +788,13 @@ class ECMAScript5Parser extends Parser {
         // this inlines SourceElementRule rule from the spec
         $.RULE("SourceElements", () => {
             $.MANY(() => {
-                // FunctionDeclaration appearing before statement implements [lookahead != {{, function}] in ExpressionStatement
-                // See https://www.ecma-international.org/ecma-262/5.1/index.html#sec-12.4Declaration
                 $.OR([
-                    { ALT: () => $.SUBRULE($.FunctionDeclaration) },
+                    // FunctionDeclaration appearing before statement implements [lookahead != {{, function}] in ExpressionStatement
+                    // See https://www.ecma-international.org/ecma-262/5.1/index.html#sec-12.4Declaration
+                    {
+                        ALT: () => $.SUBRULE($.FunctionDeclaration),
+                        IGNORE_AMBIGUITIES: true
+                    },
                     { ALT: () => $.SUBRULE($.Statement) }
                 ])
             })

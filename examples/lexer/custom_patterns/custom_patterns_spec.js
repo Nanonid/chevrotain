@@ -1,5 +1,6 @@
-const expect = require("chai").expect
+const { expect } = require("chai")
 const { tokenize, Comma, IntegerLiteral } = require("./custom_patterns")
+
 const tokenMatcher = require("chevrotain").tokenMatcher
 
 describe("The Chevrotain Lexer ability to use custom pattern implementations.", () => {
@@ -9,13 +10,13 @@ describe("The Chevrotain Lexer ability to use custom pattern implementations.", 
 
         expect(lexResult.errors).to.be.empty
         expect(lexResult.tokens).to.have.lengthOf(5)
-        expect(tokenMatcher(lexResult.tokens[0], IntegerLiteral))
+        expect(tokenMatcher(lexResult.tokens[0], IntegerLiteral)).to.be.true
         expect(lexResult.tokens[0].image).to.equal("1")
-        expect(tokenMatcher(lexResult.tokens[1], Comma))
-        expect(tokenMatcher(lexResult.tokens[2], IntegerLiteral))
+        expect(tokenMatcher(lexResult.tokens[1], Comma)).to.be.true
+        expect(tokenMatcher(lexResult.tokens[2], IntegerLiteral)).to.be.true
         expect(lexResult.tokens[2].image).to.equal("2")
-        expect(tokenMatcher(lexResult.tokens[3], Comma))
-        expect(tokenMatcher(lexResult.tokens[4], IntegerLiteral))
+        expect(tokenMatcher(lexResult.tokens[3], Comma)).to.be.true
+        expect(tokenMatcher(lexResult.tokens[4], IntegerLiteral)).to.be.true
         expect(lexResult.tokens[4].image).to.equal("3")
     })
 })

@@ -1,0 +1,10 @@
+/docs/.vuepress/dist/
+/dev
+/lib
+/lib_esm
+/.nyc_output
+/coverage
+
+/scripts/gh-pages
+
+/gh-pages

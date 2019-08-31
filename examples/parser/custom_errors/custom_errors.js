@@ -1,13 +1,13 @@
 /*
  * An example showing how to customize the error messages produced by the parser.
  * This is done by providing a custom "errorMessageProvider" during parser initialization.
- * The detailed API for the IErrorMessageProvider can be found here:
- * https://sap.github.io/chevrotain/documentation/3_1_0/interfaces/ierrormessageprovider.html
+ * A link to the detailed API for the IParserErrorMessageProvider can be found here:
+ * https://sap.github.io/chevrotain/docs/features/custom_errors.html
  */
 const {
     createToken,
     Lexer,
-    Parser,
+    CstParser,
     defaultParserErrorProvider,
     tokenName
 } = require("chevrotain")
@@ -58,7 +58,7 @@ const myErrorProvider = {
 }
 
 // ----------------- parser -----------------
-class CustomErrorsParser extends Parser {
+class CustomErrorsParser extends CstParser {
     constructor(input) {
         super(allTokens, {
             // passing our custom error message provider

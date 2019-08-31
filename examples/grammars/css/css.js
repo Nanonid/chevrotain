@@ -1,6 +1,6 @@
 const XRegExp = require("xregexp")
 const chevrotain = require("chevrotain")
-const { Lexer, Parser } = chevrotain
+const { Lexer, CstParser } = chevrotain
 
 // ----------------- lexer -----------------
 // Based on the specs in:
@@ -248,17 +248,13 @@ const CssLexer = new Lexer(cssTokens)
 
 // ----------------- parser -----------------
 
-class CssParser extends Parser {
+class CssParser extends CstParser {
     // Unfortunately no support for class fields with initializer in ES2015, only in esNext...
     // so the parsing rules are defined inside the constructor, as each parsing rule must be initialized by
     // invoking RULE(...)
     // see: https://github.com/jeffmo/es-class-fields-and-static-properties
     constructor() {
-        super(cssTokens, {
-            ignoredIssues: {
-                selector: { OR: true }
-            }
-        })
+        super(cssTokens)
 
         const $ = this
 
